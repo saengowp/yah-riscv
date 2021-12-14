@@ -33,6 +33,7 @@ assign funct7 = inst[31:25];
 reg [31:0] imm;
 always @* begin
 	case (itype)
+		0: imm = {funct7, 5'b0};
 		1: imm = { {21{inst[31]}}, inst[30:20] };
 		2: imm = { {21{inst[31]}}, inst[30:25], inst[11:8], inst[7] };
 		3: imm = { {20{inst[31]}}, inst[7], inst[30:25], inst[11:8], 1'b0};
@@ -71,8 +72,8 @@ reg [2:0] alu_op; //TODO
 /*
 0 = imm
 1 = PC + 4
-2 = rs1 + imm
-3 = rs1 - rs2
+UNUSED --- 2 = rs1 + imm 
+UNUSED --- 3 = rs1 - rs2
 4 = rs2
 5 = ALUI funct3
 6 = ALUL funct3
