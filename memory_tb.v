@@ -2,12 +2,12 @@
 
 module memory_tb;
 
-reg [31:0] addr, write_data;
+reg [31:0] addr, write_data, inst_addr;
 reg write, clk;
 
-wire [31:0] data;
+wire [31:0] data, inst_data;
 
-memory m(.addr(addr[11:0]), .write_data(write_data), .write(write), .clk(clk), .data(data));
+memory m(.addr(addr[11:0]), .write_data(write_data), .write(write), .clk(clk), .data(data), .inst_addr(inst_addr[11:0]), .inst_data(inst_data));
 
 always #5 clk = ~clk;
 
@@ -31,6 +31,10 @@ addr = 0;
 
 addr = 1;
 #10 $display("Read back: %d", data == 'hBB);
+
+inst_addr = 1;
+#10 $display("Read back: %d", data == 'hBB);
+
 
 $finish;
 
