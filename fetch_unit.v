@@ -1,7 +1,7 @@
 module fetch_unit(
 	input wire [31:0] inst,
 	input wire inst_valid,
-	input wire [31:0] avail_reg,
+	input wire [31:0] busy_reg,
 	input wire jmp_op_in_pipeline,
 
 	output valid,
@@ -10,7 +10,7 @@ module fetch_unit(
 	output [4:0] rs1,
 	output [4:0] rs2,
 	output [31:0] imm,
-	output [31:0] in_use_reg,
+	output [31:0] active_reg,
 	output [2:0] alu_op,
 	output [1:0] addr_alu_op,
 	output [1:0] wb_op,
@@ -48,33 +48,33 @@ end
 
 // Issue Instruction
 wire valid;
-assign valid = (in_use_reg & avail_reg) == 0 && inst_valid && !jmp_op_in_pipeline; 
+assign valid = (active_reg & busy_reg) == 0 && inst_valid && !jmp_op_in_pipeline; 
 /* Only issue when 
 * 	- register are available
 * 	- instruction is valid
 * 	- no jump in pipeline
 */
 
-reg [31:0] in_use_reg;
-reg [2:0] in_use_reg_field; // rs2, rs1, rd
+reg [31:0] active_reg;
+reg [2:0] active_reg_field; // rs2, rs1, rd
 always @* begin
-	in_use_reg_field = 0;
+	active_reg_field = 0;
 	case (itype)
-		0: in_use_reg_field = 'b111;
-		1: in_use_reg_field = 'b011;
-		2: in_use_reg_field = 'b110;
-		3: in_use_reg_field = 'b110;
-		4: in_use_reg_field = 'b001;
-		5: in_use_reg_field = 'b001;
-		default: in_use_reg_field = 'b000;
+		0: active_reg_field = 'b111;
+		1: active_reg_field = 'b011;
+		2: active_reg_field = 'b110;
+		3: active_reg_field = 'b110;
+		4: active_reg_field = 'b001;
+		5: active_reg_field = 'b001;
+		default: active_reg_field = 'b000;
 	endcase;
-	in_use_reg = 0;
-	if (in_use_reg_field[2])
-		in_use_reg = in_use_reg | (1 << rs2);
-	if (in_use_reg_field[1])
-		in_use_reg = in_use_reg | (1 << rs1);
-	if (in_use_reg_field[0])
-		in_use_reg = in_use_reg | (1 << rd);
+	active_reg = 0;
+	if (active_reg_field[2])
+		active_reg = active_reg | (1 << rs2);
+	if (active_reg_field[1])
+		active_reg = active_reg | (1 << rs1);
+	if (active_reg_field[0])
+		active_reg = active_reg | (1 << rd);
 end
 
 //Instruction Type R, I, S, B, U, J
@@ -97,6 +97,7 @@ reg [1:0] addr_alu_op; //TODO
 0 = pc
 1 = pc + imm
 2 = rs1 + imm
+3 = pc + imm (clearing LSB)
 */
 
 
@@ -134,21 +135,22 @@ always @* begin
 	addr_alu_op = 0;
 	mem_op = 0;
 	fault = 0;
+	jmp_op = 0;
 	case (opcode)
 		//LUI 
-		'b0110111: begin
+		7'b0110111: begin
 			itype = 4;
 			alu_op = 0;
 			wb_op = 1;
 		end
 		//AUIPC
-		'b0010111: begin
+		7'b0010111: begin
 			itype = 4;
 			addr_alu_op = 1;
 			wb_op = 2;
 		end
 		//JAL
-		'b1101111: begin
+		7'b1101111: begin
 			itype = 5;
 			alu_op = 1;
 			wb_op = 1;
@@ -156,49 +158,52 @@ always @* begin
 			jmp_op = 1;
 		end
 		//JALR
-		'b1100111:  begin
+		7'b1100111:  begin
 			itype = 1;
 			if (funct3 == 'b000) begin
 				alu_op = 1;
-				wb_op = 2;
+				addr_alu_op = 3;
+				wb_op = 1;
+				jmp_op = 1;
 			end else
 				fault = 1;
 		end
 		//Bxx
-		'b1100011: begin
+		7'b1100011: begin
 			itype = 3;
 			addr_alu_op = 1;
 			jmp_op = 2;
 		end
 		//Lxx
-		'b0000011: begin
+		7'b0000011: begin
 			itype = 1;
 			addr_alu_op = 2;
+			wb_op = 1;
 			mem_op = 1;
 		end
 		//Sx
-		'b0100011: begin
+		7'b0100011: begin
 			itype = 2;
 			addr_alu_op = 2;
 			alu_op = 4;
 			mem_op = 2;
 		end
 		//ALUI
-		'b0010011: begin
+		7'b0010011: begin
 			itype = 1;
 			alu_op = 5;
 			wb_op = 1;
 		end
 		//ALUL
-		'b0110011: begin
+		7'b0110011: begin
 			itype = 0;
 			alu_op = 6;
 			wb_op = 1;
 		end
 		//FENCE
-		'b0001111: fault = 0;
+		7'b0001111: fault = 0;
 		//ECALL
-		'b1110011:
+		7'b1110011:
 			if (rd == 0 && rs1 == 0 && rs2 == 0 && (imm == 0 || imm == 1))
 				fault = 0;
 			else
