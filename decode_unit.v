@@ -62,8 +62,6 @@ always @* begin
 		active_reg = active_reg | (1 << rs2);
 	if (active_reg_field[1])
 		active_reg = active_reg | (1 << rs1);
-	if (active_reg_field[0])
-		active_reg = active_reg | (1 << rd);
 end
 
 //Instruction Type R, I, S, B, U, J
