@@ -1,8 +1,6 @@
-module fetch_unit(
+module decode_unit(
 	input wire [31:0] inst,
 	input wire inst_valid,
-	input wire [31:0] busy_reg,
-	input wire jmp_op_in_pipeline,
 
 	output valid,
 	output [2:0] funct3,
@@ -48,12 +46,8 @@ end
 
 // Issue Instruction
 wire valid;
-assign valid = (active_reg & busy_reg) == 0 && inst_valid && !jmp_op_in_pipeline; 
-/* Only issue when 
-* 	- register are available
-* 	- instruction is valid
-* 	- no jump in pipeline
-*/
+assign valid = inst_valid;
+
 
 reg [31:0] active_reg;
 reg [2:0] active_reg_field; // rs2, rs1, rd

@@ -1,11 +1,9 @@
-`include "fetch_unit.v"
+`include "decode_unit.v"
 
-module fetch_unit_tb;
+module decode_unit_tb;
 
 reg [31:0] inst = 0;
 reg inst_valid = 0;
-reg [31:0] busy_reg = 0;
-reg jmp_op_in_pipeline = 0;
 
 wire valid, fault;
 wire [2:0] funct3;
@@ -14,11 +12,9 @@ wire [31:0] imm, active_reg;
 wire [2:0] alu_op;
 wire [1:0] addr_alu_op, wb_op, jmp_op, mem_op;
 
-fetch_unit fu(
+decode_unit du(
 	.inst(inst),
 	.inst_valid(inst_valid),
-	.busy_reg(busy_reg),
-	.jmp_op_in_pipeline(jmp_op_in_pipeline),
 	.valid(valid), .fault(fault),
 	.funct3(funct3),
 	.rd(rd), .rs1(rs1), .rs2(rs2),
@@ -29,34 +25,21 @@ fetch_unit fu(
 
 initial begin
 $dumpfile("test.vcd");
-$dumpvars(0, fetch_unit_tb);
+$dumpvars(0, decode_unit_tb);
 
 #1
-$display("Fetch Unit Test Suite");
+$display("Decode Unit Test Suite");
 
 // Valid test
 
 // Instruction: LUI x1, 0;
 inst = 32'b11111111111111111111_00001_0110111;
 inst_valid = 1;
-busy_reg = 0;
-jmp_op_in_pipeline = 0;
 #1 $display("T: Normal is valid: %d", valid);
 
 inst_valid = 0;
 #1 $display("T: Invalid is invalid: %d", valid == 0);
 inst_valid = 1;
-
-busy_reg = 31'b01;
-#1 $display("T: Non busy reg is valid: %d", valid);
-
-busy_reg = 31'b10;
-#1 $display("T: Busy reg is invalid: %d", !valid);
-busy_reg = 0;
-
-jmp_op_in_pipeline = 1;
-#1 $display("T: Jmp in pipeline is invalid: %d", !valid);
-jmp_op_in_pipeline = 0;
 
 inst = 0;
 #1 $display("T: Zero inst is valid but fault: %d", valid && fault);
