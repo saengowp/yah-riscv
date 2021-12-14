@@ -2,19 +2,18 @@
 
 module pc_tb;
 
-reg fetch_unit_valid = 0;
+reg stall = 0;
 reg [1:0] jmp_op = 0;
 reg [31:0] next_addr = 0;
 reg valid = 0;
 reg cmp = 0;
 reg fault = 0;
-
 reg clk = 0;
 
 wire [31:0] addr;
 
 pc p(
-	.fetch_unit_valid(fetch_unit_valid),
+	.stall(stall),
 	.jmp_op(jmp_op),
 	.next_addr(next_addr),
 	.valid(valid),
@@ -31,35 +30,24 @@ $dumpfile("test.vcd");
 $dumpvars(0, pc_tb);
 
 $display("PC Test Suite");
-fetch_unit_valid = 0;
-#10 $display("T: NOP when FU not ready: %d", addr == 0);
-fetch_unit_valid = 1;
-#10 $display("T: Increment when FU ready and no incoming signal: %d", addr == 4);
+stall = 1;
+#10 $display("Stall: %d", addr == 0);
+stall = 0;
+#10 $display("No Stall: %d", addr == 4);
 valid = 1;
 jmp_op = 0;
-#10 $display("T: Increment when FU ready and incoming NOP: %d", addr == 8);
-next_addr = 20;
+#10 $display("JMP NOP: %d", addr == 8);
 jmp_op = 1;
-#10 $display("T: Jump when incoming is JMP: %d", addr == 20);
-next_addr = 40;
+next_addr = 12;
+#10 $display("JMP : %d", addr == 12);
 jmp_op = 2;
+next_addr = 80;
 cmp = 0;
-#10 $display("T: Ignore when incoming JMP does not met condition: %d", addr == 20);
+#10 $display("JMP COND FALSE: %d", addr == 16);
 cmp = 1;
-#10 $display("T: Jump when JMP does not met condition: %d", addr == 40);
-fetch_unit_valid = 1;
-valid = 0;
-#10 $display("T: Continue increment: %d", addr == 44);
-fetch_unit_valid = 0;
-#10 $display("T: Stall: %d", addr == 44);
-next_addr = 1;
-valid = 1;
-cmp = 0;
-jmp_op = 2;
-#10 $display("T: No fault when condition is not met: %d", addr == 44);
-cmp = 1;
-#10 $display("T: Fault when unaligned instruction addr: %d", addr == 0);
-
+#10 $display("JMP COND TRUE: %d", addr == 80);
+next_addr = 21;
+#10 $display("JMP MISALLIGNED: %d", addr == 0);
 $finish;
 end
 

@@ -3,9 +3,8 @@
 module decode_unit_tb;
 
 reg [31:0] inst = 0;
-reg inst_valid = 0;
 
-wire valid, fault;
+wire fault;
 wire [2:0] funct3;
 wire [4:0] rd, rs1, rs2;
 wire [31:0] imm, active_reg;
@@ -14,8 +13,7 @@ wire [1:0] addr_alu_op, wb_op, jmp_op, mem_op;
 
 decode_unit du(
 	.inst(inst),
-	.inst_valid(inst_valid),
-	.valid(valid), .fault(fault),
+	.fault(fault),
 	.funct3(funct3),
 	.rd(rd), .rs1(rs1), .rs2(rs2),
 	.imm(imm), .active_reg(active_reg),
@@ -30,23 +28,12 @@ $dumpvars(0, decode_unit_tb);
 #1
 $display("Decode Unit Test Suite");
 
-// Valid test
-
-// Instruction: LUI x1, 0;
-inst = 32'b11111111111111111111_00001_0110111;
-inst_valid = 1;
-#1 $display("T: Normal is valid: %d", valid);
-
-inst_valid = 0;
-#1 $display("T: Invalid is invalid: %d", valid == 0);
-inst_valid = 1;
-
 inst = 0;
-#1 $display("T: Zero inst is valid but fault: %d", valid && fault);
+#1 $display("T: Zero inst is fault: %d", fault);
 
 // Instruction Control Signal Test
 
-$monitor("MONITOR: valid %d fault %d", valid, fault);
+$monitor("MONITOR: fault %d", fault);
 
 // lui x1, 0xF
 inst = {20'hFF, 5'd1, 7'b0110111};

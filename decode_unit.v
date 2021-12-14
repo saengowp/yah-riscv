@@ -1,8 +1,6 @@
 module decode_unit(
 	input wire [31:0] inst,
-	input wire inst_valid,
 
-	output valid,
 	output [2:0] funct3,
 	output [4:0] rd,
 	output [4:0] rs1,
@@ -45,9 +43,6 @@ always @* begin
 end
 
 // Issue Instruction
-wire valid;
-assign valid = inst_valid;
-
 
 reg [31:0] active_reg;
 reg [2:0] active_reg_field; // rs2, rs1, rd
