@@ -8,6 +8,7 @@ module alu_unit(
 	input wire [2:0] funct3,
 	output reg [31:0] alu_out,
 	output reg [31:0] addr_alu_out,
+	output reg cmp_out,
 	output reg fault
 );
 
@@ -102,6 +103,18 @@ always @* begin
 		1: addr_alu_out = pc + imm;
 		2: addr_alu_out = rs1 + imm;
 		3: addr_alu_out = (pc + imm) & (~32'b1);
+	endcase
+end
+
+always @* begin
+	cmp_out = 0;
+	case (funct3)
+		3'b000: cmp_out = rs1 == rs2;
+		3'b001: cmp_out = rs1 != rs2;
+		3'b100: cmp_out = $signed(rs1) < $signed(rs2);
+		3'b101: cmp_out = $signed(rs1) >= $signed(rs2);
+		3'b110: cmp_out = rs1 < rs2;
+		3'b111: cmp_out = rs1 >= rs2;
 	endcase
 end
 

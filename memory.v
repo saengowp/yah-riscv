@@ -22,7 +22,7 @@ end
 initial begin
 	if (ROM_FILE != "NONE") begin
 		$display("MEM LOADED");
-		$readmemh("rom.txt", mem);
+		$readmemh(ROM_FILE, mem);
 	end else
 		$display("NO MEM");
 end

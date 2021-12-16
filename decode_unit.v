@@ -153,8 +153,9 @@ always @* begin
 				addr_alu_op = 3;
 				wb_op = 1;
 				jmp_op = 1;
-			end else
+			end else begin
 				fault = 1;
+			end
 		end
 		//Bxx
 		7'b1100011: begin
@@ -194,10 +195,12 @@ always @* begin
 		7'b1110011:
 			if (rd == 0 && rs1 == 0 && rs2 == 0 && (imm == 0 || imm == 1))
 				fault = 0;
-			else
+			else begin
 				fault = 1;
-		default:
+			end
+		default: begin
 			fault = 1;
+		end
 	endcase
 end
 
