@@ -109,6 +109,7 @@ inst = {7'b1111111, 5'd1, 5'd2, 3'b010, 5'b11111,  7'b0100011};
 	rs2 == 1 &&
 	imm == 32'hFFFFFFFF &&
 	addr_alu_op == 2 &&
+	alu_op == 4 &&
 	wb_op == 0 &&
 	jmp_op == 0 &&
 	funct3 == 3'b010 &&
