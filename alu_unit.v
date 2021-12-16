@@ -102,7 +102,7 @@ always @* begin
 		0: addr_alu_out = pc;
 		1: addr_alu_out = pc + imm;
 		2: addr_alu_out = rs1 + imm;
-		3: addr_alu_out = (pc + imm) & (~32'b1);
+		3: addr_alu_out = (pc + rs1 + imm) & (~32'b1);
 	endcase
 end
 

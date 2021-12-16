@@ -78,6 +78,8 @@ register s_register(
 wire [31:0] alu_out, addr_alu_out;
 wire alu_fault;
 
+assign next_addr = addr_alu_out;
+
 alu_unit s_alu_unit(
 	.alu_op(alu_op),
 	.addr_alu_op(addr_alu_op),
@@ -87,7 +89,7 @@ alu_unit s_alu_unit(
 	.pc(inst_addr),
 	.funct3(funct3),
 	.alu_out(alu_out),
-	.addr_alu_out(next_addr),
+	.addr_alu_out(addr_alu_out),
 	.fault(alu_fault),
 	.cmp_out(cmp)
 );
@@ -96,7 +98,7 @@ wire [31:0] mem_unit_out;
 wire mem_unit_fault;
 
 assign reg_write_enable = wb_op != 0;
-assign reg_write_data = mem_unit_out;
+assign reg_write_data = wb_op == 1 ? mem_unit_out : addr_alu_out;
 
 mem_unit s_mem_unit(
 	.mem_op(mem_op),

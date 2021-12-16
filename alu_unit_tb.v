@@ -125,7 +125,7 @@ addr_alu_op = 1;
 addr_alu_op = 2;
 #1 $display(addr_alu_out == 5);
 addr_alu_op = 3;
-#1 $display(addr_alu_out == 'hF2);
+#1 $display(addr_alu_out == 'hF4);
 
 $finish;
 
