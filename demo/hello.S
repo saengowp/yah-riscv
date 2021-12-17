@@ -24,6 +24,7 @@ hello_loop:
 	addi 	x5, x5, 0x20
 	sb 	x3, 0(x5)		# Push to buffer
 	addi 	x4, x4, 1		# Increment write ptr
+	andi	x4, x4, 0xF		# Wrap around
 	sb	x4, 0x0(x1)		# Request transmit
 wait_transmit:
 	lbu	x5, 0x0(x1)		# Get transmit status

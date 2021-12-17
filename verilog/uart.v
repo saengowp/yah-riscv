@@ -52,6 +52,9 @@ reg [3:0] tx_state = 10;
 reg [13:0] tx_start = 0;
 reg [7:0] tx_data = 0;
 
+wire [7:0] tx_buf_head[3:0];
+assign {tx_buf_head[3], tx_buf_head[2], tx_buf_head[1], tx_buf_head[0]} = tx_buf[tx_head[3:2]];
+
 // Transmit
 always @(posedge clk) begin
 	if (tx_state == 10 && tx_head != tx_ptr) begin
@@ -59,7 +62,7 @@ always @(posedge clk) begin
 		tx_state <= 0;
 		tx <= 0;
 		tx_start <= cnt;
-		tx_data <= tx_buf[tx_head[3:2]] >> tx_head[1:0];
+		tx_data <= tx_buf_head[tx_head[1:0]];
 		tx_head <= tx_head + 1;
 	end else if (tx_state != 10) begin
 		// Send data
@@ -80,6 +83,9 @@ reg brx;
 reg [7:0] rx_data;
 reg [3:0] rx_state = 10;
 reg [13:0] rx_start = 0;
+
+wire [7:0] crx_buf[3:0];
+assign {crx_buf[3], crx_buf[2], crx_buf[1], crx_buf[0]} = rx_buf[rx_ptr[3:2]];
 
 always @(posedge clk) begin
 	brx <= rx;
@@ -102,12 +108,17 @@ always @(posedge clk) begin
 			end
 			if (rx_state == 9) begin
 				if (brx) begin
-					rx_buf[rx_ptr[3:2]] <= (rx_buf[rx_ptr[3:2]] & ~(8'hFF << rx_ptr[1:0])) | (rx_data << rx_ptr[1:0]);
+					case (rx_ptr[1:0])
+						0: rx_buf[rx_ptr[3:2]] <= {crx_buf[3], crx_buf[2], crx_buf[1], rx_data};
+						1: rx_buf[rx_ptr[3:2]] <= {crx_buf[3], crx_buf[2], rx_data, crx_buf[0]};
+						2: rx_buf[rx_ptr[3:2]] <= {crx_buf[3], rx_data, crx_buf[1], crx_buf[0]};
+						3: rx_buf[rx_ptr[3:2]] <= {rx_data, crx_buf[2], crx_buf[1], crx_buf[0]};
+					endcase
 					rx_ptr <= rx_ptr + 1;
 				end
 			end
 			if (rx_state > 0 && rx_state < 9) begin
-				rx_data[rx_state - 1] <= brx;
+				rx_data <= (rx_data >> 1) | {brx, 7'b0};
 			end
 		end
 	end
