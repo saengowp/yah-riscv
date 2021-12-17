@@ -1,13 +1,13 @@
 module memory(
-	input wire [11:0] line,
+	input wire [12:0] line,
 	input wire [31:0] write_data,
 	input wire write,
 	input wire clk,
 	output wire [31:0] data,
-	input wire [11:0] inst_line,
+	input wire [12:0] inst_line,
 	output wire [31:0] inst_data);
 
-reg [31:0] mem[0:4095];
+reg [31:0] mem[0:8192];
 assign data = mem[line];
 assign inst_data = mem[inst_line];
 

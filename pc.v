@@ -39,6 +39,8 @@ end
 always @(posedge clk) begin
 	if (!stall)
 		addr <= nxt_loc;
+	else if (valid && jmp_op != 0)
+		addr <= nxt_loc;
 end
 
 endmodule

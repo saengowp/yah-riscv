@@ -85,7 +85,7 @@ reg [1:0] addr_alu_op; //TODO
 0 = pc
 1 = pc + imm
 2 = rs1 + imm
-3 = pc + rs1 + imm (clearing LSB)
+3 = rs1 + imm (clearing LSB)
 */
 
 

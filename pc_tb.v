@@ -48,6 +48,11 @@ cmp = 1;
 #10 $display("JMP COND TRUE: %d", addr == 80);
 next_addr = 21;
 #10 $display("JMP MISALLIGNED: %d", addr == 0);
+stall = 1;
+valid = 1;
+jmp_op = 1;
+next_addr = 12;
+#10 $display("JMP even when stall: %d", addr == 12);
 $finish;
 end
 
