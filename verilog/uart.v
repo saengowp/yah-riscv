@@ -17,11 +17,9 @@ module uart(
 parameter UART_PERIOD = 10417;
 
 reg [3:0] rx_ptr = 0, tx_ptr = 0, tx_head = 0;
-reg [7:0] rx_buf[0:15], tx_buf[0:15];
+reg [31:0] rx_buf[0:3], tx_buf[0:3];
 
 reg [13:0] cnt = 0;
-
-wire [3:0] wordnum = {addr[3:2], 2'b00};
 
 always @(posedge clk) begin
 	if (cnt < UART_PERIOD)
@@ -35,9 +33,9 @@ always @* begin
 	if (addr == 0)
 		data_out = {20'b0, rx_ptr, tx_head, tx_ptr};
 	else if (addr[5:4] == 1)
-		data_out = {rx_buf[wordnum + 3], rx_buf[wordnum + 2], rx_buf[wordnum + 1], rx_buf[wordnum]};
+	    data_out = rx_buf[addr[3:2]];
 	else if (addr[5:4] == 2)
-		data_out = {tx_buf[wordnum + 3], tx_buf[wordnum + 2], tx_buf[wordnum + 1], tx_buf[wordnum]};
+	    data_out = tx_buf[addr[3:2]];
 end
 
 // IO Mem Write
@@ -46,7 +44,7 @@ always @(posedge clk) begin
 		if (addr == 0)
 			tx_ptr <= data_in[3:0];
 		if (addr[5:4] == 2)
-			{tx_buf[wordnum + 3], tx_buf[wordnum + 2], tx_buf[wordnum + 1], tx_buf[wordnum]} <= data_in;
+			tx_buf[addr[3:2]] <= data_in;
 	end
 end
 
@@ -61,7 +59,7 @@ always @(posedge clk) begin
 		tx_state <= 0;
 		tx <= 0;
 		tx_start <= cnt;
-		tx_data <= tx_buf[tx_head];
+		tx_data <= tx_buf[tx_head[3:2]] >> tx_head[1:0];
 		tx_head <= tx_head + 1;
 	end else if (tx_state != 10) begin
 		// Send data
@@ -104,7 +102,7 @@ always @(posedge clk) begin
 			end
 			if (rx_state == 9) begin
 				if (brx) begin
-					rx_buf[rx_ptr] <= rx_data;
+					rx_buf[rx_ptr[3:2]] <= (rx_buf[rx_ptr[3:2]] & ~(8'hFF << rx_ptr[1:0])) | (rx_data << rx_ptr[1:0]);
 					rx_ptr <= rx_ptr + 1;
 				end
 			end
