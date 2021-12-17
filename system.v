@@ -12,6 +12,8 @@ module system(
 	output wire tx
 );
 
+parameter UART_BUAD = 9600;
+
 wire [31:0] io_addr, io_write_data, io_read_data;
 wire io_write;
 
@@ -23,7 +25,7 @@ yah_processor d_processor(
 	.io_read_data(io_read_data)
 );
 
-uart d_uart(
+uart #(.UART_PERIOD(100000000/UART_BUAD)) d_uart(
 	.tx(tx),
 	.rx(rx),
 	.addr(io_addr[5:0]),

@@ -39,8 +39,11 @@ in1 = 'h00CCBBAA;
 write1 = 1;
 write2 = 0;
 #10
+addr1 = 'h24;
+in1 = 'hABABABAB;
+#10
 addr1 = 0;
-in1 = 4;
+in1 = 5;
 #10
 write1 = 0;
 #3000 // 10 unit/clk * 5 clk/bit * 10 bit/word * 4 word

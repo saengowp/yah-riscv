@@ -21,7 +21,7 @@ reg [7:0] rx_buf[0:15], tx_buf[0:15];
 
 reg [13:0] cnt = 0;
 
-wire [1:0] wordnum = addr[3:2];
+wire [3:0] wordnum = {addr[3:2], 2'b00};
 
 always @(posedge clk) begin
 	if (cnt < UART_PERIOD)
