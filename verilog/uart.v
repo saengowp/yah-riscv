@@ -64,6 +64,7 @@ always @(posedge clk) begin
 		tx_start <= cnt;
 		tx_data <= tx_buf_head[tx_head[1:0]];
 		tx_head <= tx_head + 1;
+		$display("UART printing: %h", tx_buf_head[tx_head[1:0]]);
 	end else if (tx_state != 10) begin
 		// Send data
 		if (tx_state == 0)
@@ -75,6 +76,8 @@ always @(posedge clk) begin
 		
 		if (cnt == tx_start)
 			tx_state <= tx_state + 1;
+	end else begin
+		tx <= 1;
 	end
 end
 
@@ -115,6 +118,7 @@ always @(posedge clk) begin
 						3: rx_buf[rx_ptr[3:2]] <= {rx_data, crx_buf[2], crx_buf[1], crx_buf[0]};
 					endcase
 					rx_ptr <= rx_ptr + 1;
+					$display("UART Receiving %h", rx_data);
 				end
 			end
 			if (rx_state > 0 && rx_state < 9) begin

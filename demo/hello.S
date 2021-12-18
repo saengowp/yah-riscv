@@ -37,4 +37,4 @@ wait_transmit:
 
 .data
 hello_str:
-	.string "Hello World\n"
+	.string "Hello World\r\n"
