@@ -4,4 +4,5 @@
 _start:
 	li	sp, 0x7000
 	li	s0, 0x7000
-	j	main
+	la	a0, main
+	jr	a0

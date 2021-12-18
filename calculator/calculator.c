@@ -5,15 +5,11 @@
 //
 unsigned char *uart_dev = (unsigned char*) 0x80000000;
 #define UART_WRITE_BUF_OFFSET 0x20
+#define UART_READ_BUF_OFFSET 0x10
 
 void uart_write(const char *c, int len);
 unsigned int strlen(const char *c);
 
-void main()
-{
-	const char *hello = "Hello World!";
-	uart_write(hello, strlen(hello));
-}
 
 void uart_write(const char *c, int len) 
 {
@@ -31,6 +27,20 @@ void uart_write(const char *c, int len)
 	}
 }
 
+unsigned int uart_lastread;
+
+char uart_read()
+{
+	unsigned char rx_ctrl;
+	do {
+		rx_ctrl = *(uart_dev + 1);
+		rx_ctrl &= 0x0F;
+	} while (uart_lastread == rx_ctrl);
+	char c = *(uart_dev + UART_READ_BUF_OFFSET + uart_lastread);
+	uart_lastread = (uart_lastread + 1) & 0x0F;
+	return c;
+}
+
 unsigned int strlen(const char *c)
 {
 	unsigned int l = 0;
@@ -41,3 +51,14 @@ unsigned int strlen(const char *c)
 	return l;
 }
 
+
+void main()
+{
+	uart_lastread = 0;
+	const char *hello = "Hello World!\r\n";
+	uart_write(hello, strlen(hello));
+	while (1) {
+		char c = uart_read();
+		uart_write(&c, 1);
+	}
+}
