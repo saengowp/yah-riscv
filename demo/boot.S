@@ -3,7 +3,7 @@
 # then echo the character and copy it to a memory location
 # If J is pressed, the system would jump to that location.
 
-# riscv32-unknown-elf-gcc demo/boot.S -march=rv32i -mabi=ilp32 -nostdlib -Wl,--section-start=.text=0 -static -mno-relax
+# riscv32-unknown-elf-gcc demo/boot.S -o boot.o -march=rv32i -mabi=ilp32 -nostdlib -Wl,-Ttext=0  -Wl,-Tdata=0x200
 
 .equ UART_BASE_ADDR, 0x80000000
 
