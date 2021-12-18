@@ -1,5 +1,6 @@
 //
-//
+// riscv32-unknown-elf-gcc calculator_start.S -o calculator_start.o  -march=rv32i -mabi=ilp32 -nostdlib -T calculator.ld -c
+// riscv32-unknown-elf-gcc calculator.c  -o calculator.o -march=rv32i -mabi=ilp32 -nostdlib -T calculator.ld
 // riscv32-unknown-elf-elf2hex --input calculator.o --output demo/calculator.vh --bit-width 32
 //
 unsigned char *uart_dev = (unsigned char*) 0x80000000;
@@ -8,7 +9,7 @@ unsigned char *uart_dev = (unsigned char*) 0x80000000;
 void uart_write(const char *c, int len);
 unsigned int strlen(const char *c);
 
-void _start()
+void main()
 {
 	const char *hello = "Hello World!";
 	uart_write(hello, strlen(hello));
@@ -33,7 +34,7 @@ void uart_write(const char *c, int len)
 unsigned int strlen(const char *c)
 {
 	unsigned int l = 0;
-	while (c) {
+	while (*c) {
 		l++;
 		c++;
 	}
