@@ -226,13 +226,13 @@ void print_str(const char *c)
 	uart_write(c, strlen(c));
 }
 
-void print_num(struct bignum a)
+void print_num(struct bignum a, char *c)
 {
 	if (isneg(a)) {
-		print_str("-");
+		*c++ = '-';
 		a = sub(zero(), a);
 	} else {
-		print_str(" ");
+		*c++ = ' ';
 	}
 
 	char out[12];
@@ -245,19 +245,17 @@ void print_num(struct bignum a)
 			z = 0;
 		if (out[i] == 0) {
 			if (z)
-				print_str(" ");
+				*c++ = ' ';
 			else
-				print_str("0");
+				*c++ = '0';
 		} else {
 			z = 0;
-			char c;
-			c = '0' + out[i];
-			uart_write(&c, 1);
+			*c++ = '0' + out[i];
 		}
 		if (i == 6)
-			print_str(".");
+			*c++ = '.';
 	}
-
+	*c++ = '\0';
 }
 
 struct calculator_state
@@ -304,6 +302,7 @@ void calculator_process_input(char c)
 			cal_state.z = cal_state.y;
 			cal_state.y = cal_state.x;
 			cal_state.x = zero();
+			cal_state.input_u = 0;
 		}
 
 		int n = c - '0';
@@ -347,7 +346,7 @@ void calculator_process_input(char c)
 		if (c == '*')
 			cal_state.x = div(mul(cal_state.x, cal_state.y), ten6, &t);
 		if (c == '/')
-			cal_state.x = mul(div(cal_state.y, cal_state.x, &t), ten6);
+			cal_state.x = div(mul(cal_state.y, ten6), cal_state.x, &t);
 		cal_state.y = cal_state.z;
 		cal_state.z = cal_state.t;
 		cal_state.xresult = 1;
@@ -378,17 +377,23 @@ void main()
 	
 	
 
-	print_str("YAR-Calculator\r\n");
+	print_str("YAR-Calculator Starting up...\r\n");
 
 	while (1) {
-		print_str("\x1B [2J\x1B [;H");
-		print_str("\x1B [30;46m YAR-Processor Application Demo: RPN Calculator\x1B [0m\n\r");
-		print_str("\tT: "); print_num(cal_state.t); print_str("\n\r");
-		print_str("\tZ: "); print_num(cal_state.z); print_str("\n\r");
-		print_str("\tY: "); print_num(cal_state.y); print_str("\n\r");
-		print_str("\t\x1B [37;44mX: \x1B [0m"); print_num(cal_state.x); print_str("\n\r");
+		char c [4][20];
+		print_num(cal_state.t, c[0]);
+		print_num(cal_state.z, c[1]);
+		print_num(cal_state.y, c[2]);
+		print_num(cal_state.x, c[3]);
+
+		print_str("====================");
+		print_str("YAR-Processor Application Demo: RPN Calculator\n\r");
+		print_str("\tT: "); print_str(c[0]); print_str("\n\r");
+		print_str("\tZ: "); print_str(c[1]); print_str("\n\r");
+		print_str("\tY: "); print_str(c[2]); print_str("\n\r");
+		print_str("\tX: "); print_str(c[3]); print_str("\n\r");
 		if (cal_state.nanflag)
-			print_str("\x1B [37;41mWARNING: Overflow\x1B [0m");
+			print_str("WARNING: Overflow");
 		print_str("\n\r"); 
 		print_str("Last Key: "); uart_write(&cal_state.lastkey, 1);
 		calculator_process_input(uart_read());
